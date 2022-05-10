@@ -1,11 +1,12 @@
 const { Client, Intents } = require('discord.js');
 const { parsing } = require('./parse');
-const { run } = require('./vm2');
+const { createVM } = require('./vm2');
 
 require('dotenv').config();
 
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const vmList = {};
 
 
 client.once('ready', () => {
@@ -19,6 +20,11 @@ client.on('messageCreate', async message => {
     if (!codes) {
         return;
     }
+
+	if (vmList[message.guild.id] === undefined) {
+		vmList[message.guild.id] = createVM();
+	}
+	const run = (code) => vmList[message.guild.id].run(code);
 
     try {
         for (const code of codes) {
